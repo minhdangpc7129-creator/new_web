@@ -1,1 +1,1148 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diễn Đàn Trao Đổi & Bảng Tin</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        background: #f0f2f5;
+        padding: 20px;
+        max-width: 950px;
+        margin: 0 auto;
+      }
+      .auth-box {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 420px;
+        margin: 40px auto;
+      }
+      .auth-box h2 {
+        text-align: center;
+        color: #1e293b;
+        margin-bottom: 25px;
+      }
+      .auth-box p.note {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      .tab-buttons {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+      }
+      .tab-btn {
+        flex: 1;
+        background: transparent;
+        color: #666;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 6px 6px 0 0;
+      }
+      .tab-btn.active {
+        background: #2563eb;
+        color: white;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+      }
+      input[readonly] {
+        background: #f5f5f5;
+        cursor: not-allowed;
+      }
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        width: 100%;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      .btn-small {
+        padding: 6px 12px;
+        font-size: 13px;
+        width: auto;
+      }
+      .btn-delete {
+        background: #ef4444;
+      }
+      .btn-delete:hover {
+        background: #dc2626;
+      }
+      .btn-ban {
+        background: #d97706;
+      }
+      .btn-ban:hover {
+        background: #b45309;
+      }
+      .logout-btn {
+        background: #ef4444;
+        margin-bottom: 20px;
+        width: auto;
+      }
+      .logout-btn:hover {
+        background: #dc2626;
+      }
+      .error-msg {
+        color: #dc2626;
+        font-size: 13px;
+        margin-bottom: 10px;
+        min-height: 18px;
+      }
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .form-box,
+      .admin-panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+      }
+      .admin-panel {
+        border-left: 5px solid #d97706;
+      }
+      .forum-tabs-bar {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        margin-bottom: 20px;
+        padding-bottom: 5px;
+      }
+      .forum-tab-pill {
+        background: #e2e8f0;
+        color: #334155;
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+        width: auto;
+      }
+      .forum-tab-pill.active {
+        background: #2563eb;
+        color: white;
+      }
+      .post {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      .post h3 {
+        color: #1e293b;
+      }
+      .post .meta {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 12px;
+        line-height: 1.6;
+      }
+      .post .to {
+        color: #d97706;
+        font-weight: bold;
+      }
+      .post .content {
+        line-height: 1.6;
+        margin-bottom: 15px;
+        word-break: break-word;
+      }
+      .post-img,
+      .post-video {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 10px 0;
+        display: block;
+      }
+      .file-attachment {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        padding: 12px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px 0;
+      }
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        overflow: hidden;
+      }
+      .file-name {
+        font-size: 14px;
+        color: #1e293b;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .comment-section {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+      .comment {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .comment .cmt-author {
+        font-weight: bold;
+        font-size: 14px;
+        color: #334155;
+        margin-right: 8px;
+      }
+      .cmt-left {
+        flex: 1;
+        overflow: hidden;
+      }
+      .cmt-right {
+        flex-shrink: 0;
+        display: flex;
+        gap: 5px;
+      }
+      .cmt-name-info {
+        font-size: 13px;
+        color: #666;
+        margin: 4px 0 8px;
+      }
+      .media-preview {
+        max-width: 200px;
+        border-radius: 6px;
+        margin: 8px 0;
+        display: none;
+      }
+      .input-group {
+        margin-bottom: 12px;
+      }
+      #forumArea {
+        display: none;
+      }
+      .user-info {
+        text-align: right;
+        color: #4b5563;
+        margin-bottom: 10px;
+      }
+      .badge-admin {
+        background: #d97706;
+        color: white;
+        padding: 2px 6px;
+        font-size: 11px;
+        border-radius: 4px;
+        margin-left: 5px;
+      }
+      .readonly-notice {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 20px;
+        border: 1px solid #fcd34d;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- KHU VỰC ĐĂNG NHẬP / ĐĂNG KÝ -->
+    <div class="auth-box" id="authArea">
+      <h2>🔐 Tài Khoản</h2>
+      <p class="note">Đăng nhập hoặc tạo tài khoản để tham gia diễn đàn</p>
+      <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="login">Đăng Nhập</button>
+        <button class="tab-btn" data-tab="register">Tạo Tài Khoản</button>
+      </div>
+      <div class="tab-content active" id="loginTab">
+        <form id="loginForm">
+          <div class="error-msg" id="loginError"></div>
+          <label>Email</label>
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="Nhập email"
+            required
+          />
+          <label>Mật khẩu</label>
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Nhập mật khẩu"
+            required
+          />
+          <label
+            style="display: flex; align-items: center; gap: 8px; margin: 10px 0"
+          >
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked
+              style="width: auto; margin: 0"
+            />
+            Nhớ đăng nhập
+          </label>
+          <button type="submit">Đăng Nhập</button>
+        </form>
+      </div>
+      <div class="tab-content" id="registerTab">
+        <form id="registerForm">
+          <div class="error-msg" id="registerError"></div>
+          <label>Tên hiển thị</label>
+          <input
+            type="text"
+            id="regDisplayName"
+            placeholder="Tên bạn muốn hiển thị"
+            required
+          />
+          <label>Email</label>
+          <input
+            type="email"
+            id="regEmail"
+            placeholder="Email dùng để đăng nhập"
+            required
+          />
+          <label>Mật khẩu</label>
+          <input
+            type="password"
+            id="regPassword"
+            placeholder="Tạo mật khẩu (từ 6 ký tự)"
+            required
+          />
+          <label>Nhập lại mật khẩu</label>
+          <input
+            type="password"
+            id="regPassword2"
+            placeholder="Nhập lại mật khẩu"
+            required
+          />
+          <button type="submit">Tạo Tài Khoản</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- KHU VỰC DIỄN ĐÀN CHÍNH -->
+    <div id="forumArea">
+      <div class="user-info">
+        Xin chào, <strong id="currentUserName"></strong>
+        <span id="userRoleBadge"></span>
+        <button class="logout-btn btn-small" onclick="logout()">
+          Đăng Xuất
+        </button>
+      </div>
+      <header>
+        <h1>🌐 Diễn Đàn & Bảng Tin Trực Tuyến</h1>
+        <p>Chia sẻ ý kiến, tập tin Word/Excel/PDF và thảo luận</p>
+      </header>
+
+      <!-- BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN -->
+      <div id="adminPanel" class="admin-panel" style="display: none">
+        <h3>🛡️ Bảng Điều Khiển Quản Trị Viên</h3>
+        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ddd" />
+
+        <!-- Thêm Admin mới -->
+        <div style="margin-bottom: 15px">
+          <p style="font-size: 13px; color: #666; margin-bottom: 6px">
+            Cấp quyền Quản trị viên bằng email:
+          </p>
+          <div style="display: flex; gap: 10px">
+            <input
+              type="email"
+              id="newAdminEmail"
+              placeholder="Nhập email tài khoản..."
+              style="margin: 0; flex: 1"
+            />
+            <button
+              class="btn-small"
+              onclick="promoteAdmin()"
+              style="width: auto"
+            >
+              Thêm Admin
+            </button>
+          </div>
+          <div class="error-msg" id="adminError" style="margin-top: 5px"></div>
+        </div>
+
+        <!-- Tạo Diễn Đàn Mới & Cấu Hình Chế Độ -->
+        <div>
+          <p style="font-size: 13px; color: #666; margin-bottom: 6px">
+            Tạo danh mục diễn đàn mới / Cấu hình quyền hạn:
+          </p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap">
+            <input
+              type="text"
+              id="newCategoryName"
+              placeholder="Tên diễn đàn (VD: Thông báo, Thảo luận...)"
+              style="margin: 0; flex: 2; min-width: 200px"
+            />
+            <select
+              id="newCategoryMode"
+              style="margin: 0; flex: 1.5; min-width: 200px"
+            >
+              <option value="normal">
+                Cho phép mọi người đăng bài & bình luận
+              </option>
+              <option value="readonly">
+                Chỉ cho phép bình luận (Khóa đăng bài)
+              </option>
+              <option value="admin_only_post">
+                Chỉ Admin đăng bài - Mọi người bình luận
+              </option>
+            </select>
+            <button
+              class="btn-small"
+              onclick="createCategory()"
+              style="width: auto; background: #16a34a"
+            >
+              Tạo Diễn Đàn
+            </button>
+          </div>
+          <div
+            class="error-msg"
+            id="categoryError"
+            style="margin-top: 5px"
+          ></div>
+        </div>
+      </div>
+
+      <!-- THANH CHUYỂN ĐỔI CÁC DIỄN ĐÀN -->
+      <div class="forum-tabs-bar" id="forumTabsBar"></div>
+
+      <!-- KHU VỰC THÔNG BÁO QUYỀN HẠN CỦA DIỄN ĐÀN -->
+      <div
+        id="readonlyNotice"
+        class="readonly-notice"
+        style="display: none"
+      ></div>
+
+      <!-- KHUNG ĐĂNG BÀI VIẾT -->
+      <div class="form-box" id="postFormBox">
+        <h3>✍️ Đăng bài / Gửi tin</h3>
+        <input
+          type="text"
+          id="authorName"
+          placeholder="Tên hiển thị"
+          readonly
+        />
+        <label>Gửi đến:</label>
+        <select id="receiverSelect" onchange="toggleReceiverInput()">
+          <option value="Tất cả mọi người">📢 Tất cả mọi người</option>
+          <option value="Bạn A">Bạn A</option>
+          <option value="Bạn B">Bạn B</option>
+          <option value="Bạn C">Bạn C</option>
+          <option value="khác">✏️ Tên khác...</option>
+        </select>
+        <input
+          type="text"
+          id="receiverCustom"
+          placeholder="Nhập tên người nhận..."
+          style="display: none; margin-top: -10px"
+        />
+
+        <input
+          type="text"
+          id="postTitle"
+          placeholder="Tiêu đề bài viết *"
+          required
+        />
+        <textarea
+          id="postContent"
+          rows="3"
+          placeholder="Nội dung bài viết..."
+        ></textarea>
+
+        <div class="input-group">
+          <label>📷 Đính kèm ảnh:</label>
+          <input
+            type="file"
+            id="postImage"
+            accept="image/*"
+            onchange="previewPostMedia('image')"
+          />
+          <img id="postImgPreview" class="media-preview" alt="Xem trước ảnh" />
+        </div>
+
+        <div class="input-group">
+          <label>🎬 Đính kèm video:</label>
+          <input
+            type="file"
+            id="postVideo"
+            accept="video/*"
+            onchange="previewPostMedia('video')"
+          />
+          <video id="postVidPreview" class="media-preview" controls></video>
+        </div>
+
+        <div class="input-group">
+          <label>📎 Đính kèm tệp tin (Word, Excel, PDF, v.v.):</label>
+          <input
+            type="file"
+            id="postFile"
+            accept=".doc,.docx,.xls,.xlsx,.pdf,.txt,.zip,.rar"
+            onchange="previewPostFile()"
+          />
+          <div
+            id="postFilePreview"
+            style="font-size: 13px; color: #2563eb; margin-top: 5px"
+          ></div>
+        </div>
+
+        <button onclick="addPost()">Đăng Bài</button>
+      </div>
+
+      <!-- DANH SÁCH BÀI VIẾT CỦA DIỄN ĐÀN ĐANG CHỌN -->
+      <div id="forumContainer"></div>
+    </div>
+
+    <script>
+      let users = JSON.parse(localStorage.getItem("forumUsers")) || [];
+      let admins = JSON.parse(localStorage.getItem("forumAdmins")) || [];
+      let bannedUsers = JSON.parse(localStorage.getItem("forumBanned")) || [];
+
+      let categories = JSON.parse(localStorage.getItem("forumCategories")) || [
+        { id: "general", name: "🌐 Diễn Đàn Chung", mode: "normal" },
+        {
+          id: "announcement",
+          name: "📢 Bảng Tin Thông Báo",
+          mode: "admin_only_post",
+        },
+      ];
+      let currentCategory = categories[0].id;
+
+      let posts = JSON.parse(localStorage.getItem("forumPosts")) || [];
+      let currentUser = null;
+
+      let postImageData = null;
+      let postVideoData = null;
+      let postFileDataObj = null;
+      let commentMediaMap = {};
+
+      if (admins.length === 0 && users.length > 0) {
+        admins.push(users[0].email);
+        localStorage.setItem("forumAdmins", JSON.stringify(admins));
+      }
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((c) => c.classList.remove("active"));
+          btn.classList.add("active");
+          document
+            .getElementById(btn.dataset.tab + "Tab")
+            .classList.add("active");
+          clearErrors();
+        });
+      });
+
+      function clearErrors() {
+        document.getElementById("loginError").textContent = "";
+        document.getElementById("registerError").textContent = "";
+        const adminErr = document.getElementById("adminError");
+        if (adminErr) adminErr.textContent = "";
+        const catErr = document.getElementById("categoryError");
+        if (catErr) catErr.textContent = "";
+      }
+
+      window.onload = function () {
+        const savedEmail = localStorage.getItem("savedEmail");
+        const savedPass = localStorage.getItem("savedPassword");
+        if (savedEmail && savedPass) {
+          if (bannedUsers.includes(savedEmail)) {
+            logout();
+            return;
+          }
+          const found = users.find(
+            (u) => u.email === savedEmail && u.password === savedPass,
+          );
+          if (found) {
+            currentUser = { ...found };
+            showForum();
+          }
+        }
+      };
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearErrors();
+          const displayName = document
+            .getElementById("regDisplayName")
+            .value.trim();
+          const email = document.getElementById("regEmail").value.trim();
+          const pass = document.getElementById("regPassword").value;
+          const pass2 = document.getElementById("regPassword2").value;
+
+          if (bannedUsers.includes(email))
+            return (document.getElementById("registerError").textContent =
+              "Email này đã bị cấm khỏi hệ thống!");
+          if (!displayName || displayName.length < 2)
+            return (document.getElementById("registerError").textContent =
+              "Tên hiển thị ít nhất 2 ký tự!");
+          if (pass.length < 6)
+            return (document.getElementById("registerError").textContent =
+              "Mật khẩu ít nhất 6 ký tự!");
+          if (pass !== pass2)
+            return (document.getElementById("registerError").textContent =
+              "Mật khẩu nhập lại không khớp!");
+          if (users.some((u) => u.email === email))
+            return (document.getElementById("registerError").textContent =
+              "Email này đã được đăng ký!");
+
+          const newUser = { displayName, email, password: pass };
+          users.push(newUser);
+          localStorage.setItem("forumUsers", JSON.stringify(users));
+
+          if (admins.length === 0) {
+            admins.push(email);
+            localStorage.setItem("forumAdmins", JSON.stringify(admins));
+          }
+
+          currentUser = { ...newUser };
+          localStorage.setItem("savedEmail", email);
+          localStorage.setItem("savedPassword", pass);
+          showForum();
+        });
+
+      document.getElementById("loginForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        clearErrors();
+        const email = document.getElementById("loginEmail").value.trim();
+        const pass = document.getElementById("loginPassword").value;
+        const remember = document.getElementById("rememberMe").checked;
+
+        if (bannedUsers.includes(email))
+          return (document.getElementById("loginError").textContent =
+            "Tài khoản của bạn đã bị cấm truy cập!");
+
+        const found = users.find(
+          (u) => u.email === email && u.password === pass,
+        );
+        if (!found)
+          return (document.getElementById("loginError").textContent =
+            "Email hoặc mật khẩu không đúng!");
+
+        currentUser = { ...found };
+        remember
+          ? (localStorage.setItem("savedEmail", email),
+            localStorage.setItem("savedPassword", pass))
+          : (localStorage.removeItem("savedEmail"),
+            localStorage.removeItem("savedPassword"));
+        showForum();
+      });
+
+      function isAdmin(email) {
+        return admins.includes(email);
+      }
+
+      function showForum() {
+        if (bannedUsers.includes(currentUser.email)) {
+          alert("Tài khoản của bạn đã bị cấm!");
+          logout();
+          return;
+        }
+
+        document.getElementById("authArea").style.display = "none";
+        document.getElementById("forumArea").style.display = "block";
+        document.getElementById("currentUserName").textContent =
+          currentUser.displayName;
+        document.getElementById("authorName").value = currentUser.displayName;
+
+        const roleBadge = document.getElementById("userRoleBadge");
+        const adminPanel = document.getElementById("adminPanel");
+
+        if (isAdmin(currentUser.email)) {
+          roleBadge.innerHTML = `<span class="badge-admin">Admin</span>`;
+          adminPanel.style.display = "block";
+        } else {
+          roleBadge.innerHTML = "";
+          adminPanel.style.display = "none";
+        }
+
+        renderForumTabs();
+        renderPosts();
+      }
+
+      function createCategory() {
+        const nameInput = document.getElementById("newCategoryName");
+        const modeSelect = document.getElementById("newCategoryMode");
+        const errEl = document.getElementById("categoryError");
+        const name = nameInput.value.trim();
+
+        if (!name) {
+          errEl.textContent = "Vui lòng nhập tên diễn đàn!";
+          return;
+        }
+
+        const newId = "forum_" + Date.now();
+        categories.push({ id: newId, name: name, mode: modeSelect.value });
+        localStorage.setItem("forumCategories", JSON.stringify(categories));
+
+        nameInput.value = "";
+        errEl.style.color = "#16a34a";
+        errEl.textContent = "Đã tạo thành công diễn đàn mới!";
+        setTimeout(() => {
+          errEl.style.color = "#dc2626";
+          errEl.textContent = "";
+        }, 3000);
+
+        renderForumTabs();
+      }
+
+      function renderForumTabs() {
+        const bar = document.getElementById("forumTabsBar");
+        bar.innerHTML = "";
+
+        categories.forEach((cat) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "forum-tab-pill " + (currentCategory === cat.id ? "active" : "");
+          let icon = "";
+          if (cat.mode === "readonly") icon = "🔒";
+          if (cat.mode === "admin_only_post") icon = "📢";
+
+          btn.innerHTML = `${cat.name} ${icon}`;
+          btn.onclick = () => {
+            currentCategory = cat.id;
+            renderForumTabs();
+            renderPosts();
+          };
+          bar.appendChild(btn);
+        });
+
+        const activeCat =
+          categories.find((c) => c.id === currentCategory) || categories[0];
+        const postFormBox = document.getElementById("postFormBox");
+        const readonlyNotice = document.getElementById("readonlyNotice");
+        const userIsAdmin = isAdmin(currentUser.email);
+
+        if (activeCat.mode === "readonly") {
+          postFormBox.style.display = "none";
+          readonlyNotice.style.display = "block";
+          readonlyNotice.innerHTML =
+            "🔒 Diễn đàn này đang ở chế độ <strong>Chỉ cho phép bình luận</strong>. Không ai có thể đăng bài viết mới.";
+        } else if (activeCat.mode === "admin_only_post") {
+          if (userIsAdmin) {
+            postFormBox.style.display = "block";
+            readonlyNotice.style.display = "none";
+          } else {
+            postFormBox.style.display = "none";
+            readonlyNotice.style.display = "block";
+            readonlyNotice.innerHTML =
+              "📢 Diễn đàn này <strong>Chỉ Quản trị viên mới được đăng bài</strong>. Thành viên có thể đọc và bình luận bài viết bình thường.";
+          }
+        } else {
+          postFormBox.style.display = "block";
+          readonlyNotice.style.display = "none";
+        }
+      }
+
+      function promoteAdmin() {
+        const emailInput = document.getElementById("newAdminEmail");
+        const email = emailInput.value.trim();
+        const errEl = document.getElementById("adminError");
+
+        if (!email) {
+          errEl.textContent = "Vui lòng nhập email!";
+          return;
+        }
+        if (!users.some((u) => u.email === email)) {
+          errEl.textContent = "Không tìm thấy tài khoản với email này!";
+          return;
+        }
+        if (admins.includes(email)) {
+          errEl.textContent = "Tài khoản này đã là Admin!";
+          return;
+        }
+
+        admins.push(email);
+        localStorage.setItem("forumAdmins", JSON.stringify(admins));
+        emailInput.value = "";
+        errEl.style.color = "#16a34a";
+        errEl.textContent = "Đã cấp quyền Admin cho " + email;
+        setTimeout(() => {
+          errEl.style.color = "#dc2626";
+          errEl.textContent = "";
+        }, 3000);
+        showForum();
+      }
+
+      function banUser(email, name) {
+        if (email === currentUser.email) {
+          alert("Bạn không thể tự cấm tài khoản của chính mình!");
+          return;
+        }
+        if (
+          confirm(`Bạn có chắc chắn muốn cấm tài khoản "${name}" (${email})?`)
+        ) {
+          if (!bannedUsers.includes(email)) {
+            bannedUsers.push(email);
+            localStorage.setItem("forumBanned", JSON.stringify(bannedUsers));
+          }
+          alert(`Đã cấm tài khoản ${email}`);
+          renderPosts();
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem("savedEmail");
+        localStorage.removeItem("savedPassword");
+        currentUser = null;
+        postImageData = null;
+        postVideoData = null;
+        postFileDataObj = null;
+        commentMediaMap = {};
+        document.getElementById("authArea").style.display = "block";
+        document.getElementById("forumArea").style.display = "none";
+        document.getElementById("loginForm").reset();
+        document.getElementById("registerForm").reset();
+        clearErrors();
+      }
+
+      function toggleReceiverInput() {
+        const select = document.getElementById("receiverSelect");
+        document.getElementById("receiverCustom").style.display =
+          select.value === "khác" ? "block" : "none";
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function previewPostMedia(type) {
+        if (type === "image") {
+          const file = document.getElementById("postImage").files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              postImageData = e.target.result;
+              const prev = document.getElementById("postImgPreview");
+              prev.src = postImageData;
+              prev.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        } else if (type === "video") {
+          const file = document.getElementById("postVideo").files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              postVideoData = e.target.result;
+              const prev = document.getElementById("postVidPreview");
+              prev.src = postVideoData;
+              prev.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+
+      function previewPostFile() {
+        const fileInput = document.getElementById("postFile");
+        const file = fileInput.files[0];
+        const previewEl = document.getElementById("postFilePreview");
+
+        if (!file) {
+          postFileDataObj = null;
+          previewEl.textContent = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          postFileDataObj = {
+            name: file.name,
+            size: (file.size / 1024).toFixed(1) + " KB",
+            type: file.type || "application/octet-stream",
+            data: e.target.result,
+          };
+          previewEl.textContent = `Đã đính kèm: ${file.name} (${postFileDataObj.size})`;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function previewCommentMedia(e, postIdx) {
+        const file = e.target.files[0];
+        if (!file) {
+          delete commentMediaMap[postIdx];
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          commentMediaMap[postIdx] = {
+            name: file.name,
+            size: (file.size / 1024).toFixed(1) + " KB",
+            data: evt.target.result,
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function addPost() {
+        const title = document.getElementById("postTitle").value.trim();
+        const content = document.getElementById("postContent").value.trim();
+        const receiverSelect = document.getElementById("receiverSelect").value;
+        const receiverCustom = document
+          .getElementById("receiverCustom")
+          .value.trim();
+        const receiver =
+          receiverSelect === "khác"
+            ? receiverCustom || "Người khác"
+            : receiverSelect;
+
+        if (!title) {
+          alert("Vui lòng nhập tiêu đề bài viết!");
+          return;
+        }
+
+        const newPost = {
+          categoryId: currentCategory,
+          title,
+          content,
+          author: currentUser.displayName,
+          authorEmail: currentUser.email,
+          receiver,
+          image: postImageData,
+          video: postVideoData,
+          file: postFileDataObj,
+          time: new Date().toLocaleString("vi-VN"),
+          comments: [],
+        };
+
+        posts.unshift(newPost);
+        localStorage.setItem("forumPosts", JSON.stringify(posts));
+
+        document.getElementById("postTitle").value = "";
+        document.getElementById("postContent").value = "";
+        document.getElementById("postImage").value = "";
+        document.getElementById("postVideo").value = "";
+        document.getElementById("postFile").value = "";
+        document.getElementById("postImgPreview").style.display = "none";
+        document.getElementById("postVidPreview").style.display = "none";
+        document.getElementById("postFilePreview").textContent = "";
+        postImageData = null;
+        postVideoData = null;
+        postFileDataObj = null;
+
+        renderPosts();
+      }
+
+      function deletePost(globalIdx) {
+        if (confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) {
+          posts.splice(globalIdx, 1);
+          localStorage.setItem("forumPosts", JSON.stringify(posts));
+          renderPosts();
+        }
+      }
+
+      function addComment(globalIdx) {
+        const input = document.getElementById(`commentInput-${globalIdx}`);
+        const text = input.value.trim();
+        const media = commentMediaMap[globalIdx];
+
+        if (!text && !media) return;
+
+        if (!posts[globalIdx].comments) {
+          posts[globalIdx].comments = [];
+        }
+
+        posts[globalIdx].comments.push({
+          author: currentUser.displayName,
+          authorEmail: currentUser.email,
+          text,
+          file: media || null,
+          time: new Date().toLocaleString("vi-VN"),
+        });
+
+        localStorage.setItem("forumPosts", JSON.stringify(posts));
+        delete commentMediaMap[globalIdx];
+        renderPosts();
+      }
+
+      function deleteComment(globalIdx, cmtIdx) {
+        if (confirm("Xóa bình luận này?")) {
+          posts[globalIdx].comments.splice(cmtIdx, 1);
+          localStorage.setItem("forumPosts", JSON.stringify(posts));
+          renderPosts();
+        }
+      }
+
+      function renderPosts() {
+        const container = document.getElementById("forumContainer");
+        container.innerHTML = "";
+
+        const filteredPosts = posts
+          .map((post, idx) => ({ post, originalIndex: idx }))
+          .filter(
+            (item) => (item.post.categoryId || "general") === currentCategory,
+          );
+
+        if (filteredPosts.length === 0) {
+          container.innerHTML = `<p style="text-align: center; color: #666; padding: 25px; background: white; border-radius: 10px;">Chưa có bài viết nào trong diễn đàn này.</p>`;
+          return;
+        }
+
+        filteredPosts.forEach(({ post, originalIndex: idx }) => {
+          const isUserAdmin = isAdmin(currentUser.email);
+          const isOwner = currentUser && post.authorEmail === currentUser.email;
+          const canDeletePost = isOwner || isUserAdmin;
+
+          let postMediaHtml = "";
+          if (post.image) {
+            postMediaHtml += `<img src="${post.image}" class="post-img" alt="Ảnh bài đăng" />`;
+          }
+          if (post.video) {
+            postMediaHtml += `<video src="${post.video}" class="post-video" controls></video>`;
+          }
+
+          let postFileHtml = "";
+          if (post.file) {
+            postFileHtml = `
+              <div class="file-attachment">
+                <div class="file-info">
+                  <span>📄</span>
+                  <div>
+                    <div class="file-name">${escapeHtml(post.file.name)}</div>
+                    <div style="font-size: 11px; color: #64748b;">Dung lượng: ${post.file.size}</div>
+                  </div>
+                </div>
+                <a href="${post.file.data}" download="${escapeHtml(post.file.name)}" style="background: #2563eb; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 13px;">Tải xuống</a>
+              </div>
+            `;
+          }
+
+          let commentsHtml = "";
+          if (post.comments && post.comments.length > 0) {
+            post.comments.forEach((cmt, cmtIdx) => {
+              const isCmtOwner =
+                currentUser && cmt.authorEmail === currentUser.email;
+              const canDeleteCmt = isCmtOwner || isUserAdmin;
+
+              let cmtFileHtml = "";
+              if (cmt.file) {
+                cmtFileHtml = `
+                  <div class="file-attachment" style="margin-top: 6px;">
+                    <div class="file-info">
+                      <span>📎</span>
+                      <div class="file-name" style="font-size: 13px;">${escapeHtml(cmt.file.name)}</div>
+                    </div>
+                    <a href="${cmt.file.data}" download="${escapeHtml(cmt.file.name)}" style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px;">Tải xuống</a>
+                  </div>
+                `;
+              }
+
+              commentsHtml += `
+              <div class="comment">
+                <div class="cmt-left">
+                  <span class="cmt-author">${escapeHtml(cmt.author)}</span>
+                  <span class="cmt-name-info">(${cmt.time})</span>
+                  <div class="content" style="margin: 4px 0; font-size: 14px;">${escapeHtml(cmt.text)}</div>
+                  ${cmtFileHtml}
+                </div>
+                <div class="cmt-right">
+                  ${canDeleteCmt ? `<button class="btn-small btn-delete" onclick="deleteComment(${idx}, ${cmtIdx})">Xóa</button>` : ""}
+                </div>
+              </div>
+            `;
+            });
+          }
+
+          let banBtnHtml = "";
+          if (isUserAdmin && post.authorEmail !== currentUser.email) {
+            banBtnHtml = `<button class="btn-small btn-ban" onclick="banUser('${escapeHtml(post.authorEmail)}', '${escapeHtml(post.author)}')">⛔ Cấm</button>`;
+          }
+
+          // Mọi người đều có quyền bình luận và gửi file ở phần bình luận
+          const commentSectionHtml = `
+            <div class="comment-section">
+              <h4>💬 Bình luận</h4>
+              <div id="commentList-${idx}">${commentsHtml}</div>
+              <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="commentInput-${idx}" placeholder="Viết bình luận hoặc gửi file..." style="margin: 0; flex: 1; min-width: 150px;" />
+                <input type="file" accept=".doc,.docx,.xls,.xlsx,.pdf,image/*,video/*" onchange="previewCommentMedia(event, ${idx})" style="width: auto; margin: 0; font-size: 13px;" />
+                <button class="btn-small" onclick="addComment(${idx})">Gửi</button>
+              </div>
+            </div>
+          `;
+
+          const el = document.createElement("div");
+          el.className = "post";
+          el.innerHTML = `
+          <div class="post-header">
+            <h3>${escapeHtml(post.title)}</h3>
+            <div style="display: flex; gap: 6px;">
+              ${canDeletePost ? `<button class="btn-small btn-delete" onclick="deletePost(${idx})">🗑️ Xóa</button>` : ""}
+              ${banBtnHtml}
+            </div>
+          </div>
+          <p class="meta">
+            👤 Từ: <strong>${escapeHtml(post.author)}</strong> &lt;${escapeHtml(post.authorEmail)}&gt;<br>
+            📩 Đến: <span class="to">${escapeHtml(post.receiver)}</span><br>
+            🕒 Thời gian: ${post.time}
+          </p>
+          <div class="content">${escapeHtml(post.content).replace(/\n/g, "<br>")}</div>
+          ${postMediaHtml}
+          ${postFileHtml}
+          ${commentSectionHtml}
+        `;
+          container.appendChild(el);
+        });
+      }
+    </script>
+  </body>
+</html>
 
