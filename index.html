@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Diễn Đàn Trao Đổi & Bảng Tin</title>
+    <!-- Nhúng thư viện EmailJS SDK từ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      (function () {
+        emailjs.init({
+          publicKey: "Or4PACu15KPgzdk_O",
+        });
+      })();
+    </script>
     <style>
       * {
         margin: 0;
@@ -59,6 +68,27 @@
       }
       .tab-content.active {
         display: block;
+      }
+      .method-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .method-btn {
+        flex: 1;
+        background: #e2e8f0;
+        color: #334155;
+        border: none;
+        padding: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+        width: auto;
+      }
+      .method-btn.active {
+        background: #2563eb;
+        color: white;
       }
       input,
       textarea,
@@ -143,6 +173,7 @@
         overflow-x: auto;
         margin-bottom: 20px;
         padding-bottom: 5px;
+        align-items: center;
       }
       .forum-tab-pill {
         background: #e2e8f0;
@@ -155,10 +186,29 @@
         font-weight: bold;
         white-space: nowrap;
         width: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
       }
       .forum-tab-pill.active {
         background: #2563eb;
         color: white;
+      }
+      .forum-tab-delete {
+        background: rgba(0, 0, 0, 0.15);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+      }
+      .forum-tab-delete:hover {
+        background: #dc2626;
       }
       .post {
         background: white;
@@ -297,19 +347,41 @@
     <!-- KHU VỰC ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div class="auth-box" id="authArea">
       <h2>🔐 Tài Khoản</h2>
-      <p class="note">Đăng nhập hoặc tạo tài khoản để tham gia diễn đàn</p>
+      <p class="note">
+        Đăng nhập hoặc tạo tài khoản bằng Email hoặc Số điện thoại
+      </p>
       <div class="tab-buttons">
         <button class="tab-btn active" data-tab="login">Đăng Nhập</button>
         <button class="tab-btn" data-tab="register">Tạo Tài Khoản</button>
       </div>
+
+      <!-- TAB ĐĂNG NHẬP -->
       <div class="tab-content active" id="loginTab">
         <form id="loginForm">
           <div class="error-msg" id="loginError"></div>
-          <label>Email</label>
+          <div class="method-selector">
+            <button
+              type="button"
+              class="method-btn active"
+              onclick="setLoginMethod('email')"
+              id="loginBtnEmail"
+            >
+              Dùng Email
+            </button>
+            <button
+              type="button"
+              class="method-btn"
+              onclick="setLoginMethod('phone')"
+              id="loginBtnPhone"
+            >
+              Dùng Số Điện Thoại
+            </button>
+          </div>
+          <label id="loginInputLabel">Email</label>
           <input
-            type="email"
-            id="loginEmail"
-            placeholder="Nhập email"
+            type="text"
+            id="loginIdentifier"
+            placeholder="Nhập email của bạn"
             required
           />
           <label>Mật khẩu</label>
@@ -333,38 +405,105 @@
           <button type="submit">Đăng Nhập</button>
         </form>
       </div>
+
+      <!-- TAB ĐĂNG KÝ -->
       <div class="tab-content" id="registerTab">
         <form id="registerForm">
           <div class="error-msg" id="registerError"></div>
-          <label>Tên hiển thị</label>
-          <input
-            type="text"
-            id="regDisplayName"
-            placeholder="Tên bạn muốn hiển thị"
-            required
-          />
-          <label>Email</label>
-          <input
-            type="email"
-            id="regEmail"
-            placeholder="Email dùng để đăng nhập"
-            required
-          />
-          <label>Mật khẩu</label>
-          <input
-            type="password"
-            id="regPassword"
-            placeholder="Tạo mật khẩu (từ 6 ký tự)"
-            required
-          />
-          <label>Nhập lại mật khẩu</label>
-          <input
-            type="password"
-            id="regPassword2"
-            placeholder="Nhập lại mật khẩu"
-            required
-          />
-          <button type="submit">Tạo Tài Khoản</button>
+
+          <!-- Nhóm nhập thông tin ban đầu -->
+          <div id="registerInputsGroup">
+            <label>Tên hiển thị</label>
+            <input
+              type="text"
+              id="regDisplayName"
+              placeholder="Tên bạn muốn hiển thị"
+              required
+            />
+
+            <div class="method-selector">
+              <button
+                type="button"
+                class="method-btn active"
+                onclick="setRegMethod('email')"
+                id="regBtnEmail"
+              >
+                Dùng Email
+              </button>
+              <button
+                type="button"
+                class="method-btn"
+                onclick="setRegMethod('phone')"
+                id="regBtnPhone"
+              >
+                Dùng Số Điện Thoại
+              </button>
+            </div>
+            <label id="regInputLabel">Email</label>
+            <input
+              type="text"
+              id="regIdentifier"
+              placeholder="Nhập email dùng để nhận mã OTP"
+              required
+            />
+
+            <label>Mật khẩu</label>
+            <input
+              type="password"
+              id="regPassword"
+              placeholder="Tạo mật khẩu (từ 6 ký tự)"
+              required
+            />
+            <label>Nhập lại mật khẩu</label>
+            <input
+              type="password"
+              id="regPassword2"
+              placeholder="Nhập lại mật khẩu"
+              required
+            />
+          </div>
+
+          <!-- Nhóm nhập mã OTP (Ẩn đi trước khi bấm gửi mã) -->
+          <div id="otpSectionGroup" style="display: none">
+            <div
+              style="
+                background: #e0f2fe;
+                color: #0369a1;
+                padding: 10px;
+                border-radius: 6px;
+                font-size: 13px;
+                margin-bottom: 15px;
+                text-align: center;
+              "
+              id="otpInstructionText"
+            >
+              Mã OTP 6 chữ số đã được gửi đi. Vui lòng kiểm tra và nhập vào ô
+              bên dưới:
+            </div>
+            <label>Mã OTP (6 chữ số)</label>
+            <input
+              type="text"
+              id="regOtpInput"
+              maxlength="6"
+              placeholder="_ _ _ _ _ _"
+              style="
+                text-align: center;
+                font-size: 22px;
+                letter-spacing: 6px;
+                font-weight: bold;
+              "
+            />
+          </div>
+
+          <button type="submit" id="regSubmitBtn">Gửi Mã OTP</button>
+          <button
+            type="button"
+            id="regBackBtn"
+            onclick="resetRegForm()"
+            style="background: #94a3b8; margin-top: 8px; display: none"
+          >
+            Quay lại sửa thông tin
+          </button>
         </form>
       </div>
     </div>
@@ -391,13 +530,13 @@
         <!-- Thêm Admin mới -->
         <div style="margin-bottom: 15px">
           <p style="font-size: 13px; color: #666; margin-bottom: 6px">
-            Cấp quyền Quản trị viên bằng email:
+            Cấp quyền Quản trị viên bằng Email hoặc Số điện thoại:
           </p>
           <div style="display: flex; gap: 10px">
             <input
-              type="email"
+              type="text"
               id="newAdminEmail"
-              placeholder="Nhập email tài khoản..."
+              placeholder="Nhập email hoặc SĐT tài khoản..."
               style="margin: 0; flex: 1"
             />
             <button
@@ -547,6 +686,24 @@
       let admins = JSON.parse(localStorage.getItem("forumAdmins")) || [];
       let bannedUsers = JSON.parse(localStorage.getItem("forumBanned")) || [];
 
+      // Cấu hình tài khoản admin mặc định
+      const defaultAdminEmail = "pcandmt07@gmail.com";
+      const defaultAdminPass = "Hau07022k9@";
+
+      if (!users.some((u) => u.identifier === defaultAdminEmail)) {
+        users.push({
+          displayName: "Quản Trị Viên",
+          identifier: defaultAdminEmail,
+          password: defaultAdminPass,
+        });
+        localStorage.setItem("forumUsers", JSON.stringify(users));
+      }
+
+      if (!admins.includes(defaultAdminEmail)) {
+        admins.push(defaultAdminEmail);
+        localStorage.setItem("forumAdmins", JSON.stringify(admins));
+      }
+
       let categories = JSON.parse(localStorage.getItem("forumCategories")) || [
         { id: "general", name: "🌐 Diễn Đàn Chung", mode: "normal" },
         {
@@ -565,9 +722,57 @@
       let postFileDataObj = null;
       let commentMediaMap = {};
 
-      if (admins.length === 0 && users.length > 0) {
-        admins.push(users[0].email);
-        localStorage.setItem("forumAdmins", JSON.stringify(admins));
+      let loginMethod = "email";
+      let regMethod = "email";
+
+      let pendingUser = null;
+      let generatedOTP = null;
+      let isWaitingForOTP = false;
+
+      function setLoginMethod(method) {
+        loginMethod = method;
+        const input = document.getElementById("loginIdentifier");
+        const label = document.getElementById("loginInputLabel");
+        const btnEmail = document.getElementById("loginBtnEmail");
+        const btnPhone = document.getElementById("loginBtnPhone");
+
+        if (method === "email") {
+          label.textContent = "Email";
+          input.type = "email";
+          input.placeholder = "Nhập email của bạn";
+          btnEmail.classList.add("active");
+          btnPhone.classList.remove("active");
+        } else {
+          label.textContent = "Số điện thoại";
+          input.type = "tel";
+          input.placeholder = "Nhập số điện thoại của bạn";
+          btnPhone.classList.add("active");
+          btnEmail.classList.remove("active");
+        }
+        input.value = "";
+      }
+
+      function setRegMethod(method) {
+        regMethod = method;
+        const input = document.getElementById("regIdentifier");
+        const label = document.getElementById("regInputLabel");
+        const btnEmail = document.getElementById("regBtnEmail");
+        const btnPhone = document.getElementById("regBtnPhone");
+
+        if (method === "email") {
+          label.textContent = "Email";
+          input.type = "email";
+          input.placeholder = "Nhập email dùng để nhận mã OTP";
+          btnEmail.classList.add("active");
+          btnPhone.classList.remove("active");
+        } else {
+          label.textContent = "Số điện thoại";
+          input.type = "tel";
+          input.placeholder = "Nhập số điện thoại (Mô phỏng hiển thị OTP)";
+          btnPhone.classList.add("active");
+          btnEmail.classList.remove("active");
+        }
+        input.value = "";
       }
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -596,15 +801,15 @@
       }
 
       window.onload = function () {
-        const savedEmail = localStorage.getItem("savedEmail");
+        const savedId = localStorage.getItem("savedIdentifier");
         const savedPass = localStorage.getItem("savedPassword");
-        if (savedEmail && savedPass) {
-          if (bannedUsers.includes(savedEmail)) {
+        if (savedId && savedPass) {
+          if (bannedUsers.includes(savedId)) {
             logout();
             return;
           }
           const found = users.find(
-            (u) => u.email === savedEmail && u.password === savedPass,
+            (u) => u.identifier === savedId && u.password === savedPass,
           );
           if (found) {
             currentUser = { ...found };
@@ -613,82 +818,171 @@
         }
       };
 
+      // Xử lý logic Form Đăng ký (Bước 1: Gửi OTP, Bước 2: Xác thực & Tạo tài khoản)
       document
         .getElementById("registerForm")
         .addEventListener("submit", (e) => {
           e.preventDefault();
           clearErrors();
-          const displayName = document
-            .getElementById("regDisplayName")
-            .value.trim();
-          const email = document.getElementById("regEmail").value.trim();
-          const pass = document.getElementById("regPassword").value;
-          const pass2 = document.getElementById("regPassword2").value;
 
-          if (bannedUsers.includes(email))
-            return (document.getElementById("registerError").textContent =
-              "Email này đã bị cấm khỏi hệ thống!");
-          if (!displayName || displayName.length < 2)
-            return (document.getElementById("registerError").textContent =
-              "Tên hiển thị ít nhất 2 ký tự!");
-          if (pass.length < 6)
-            return (document.getElementById("registerError").textContent =
-              "Mật khẩu ít nhất 6 ký tự!");
-          if (pass !== pass2)
-            return (document.getElementById("registerError").textContent =
-              "Mật khẩu nhập lại không khớp!");
-          if (users.some((u) => u.email === email))
-            return (document.getElementById("registerError").textContent =
-              "Email này đã được đăng ký!");
+          if (!isWaitingForOTP) {
+            // --- BƯỚC 1: KIỂM TRA THÔNG TIN & GỬI MÃ OTP ---
+            const displayName = document
+              .getElementById("regDisplayName")
+              .value.trim();
+            const identifier = document
+              .getElementById("regIdentifier")
+              .value.trim();
+            const pass = document.getElementById("regPassword").value;
+            const pass2 = document.getElementById("regPassword2").value;
 
-          const newUser = { displayName, email, password: pass };
-          users.push(newUser);
-          localStorage.setItem("forumUsers", JSON.stringify(users));
+            if (bannedUsers.includes(identifier))
+              return (document.getElementById("registerError").textContent =
+                "Tài khoản này đã bị cấm khỏi hệ thống!");
+            if (!displayName || displayName.length < 2)
+              return (document.getElementById("registerError").textContent =
+                "Tên hiển thị ít nhất 2 ký tự!");
+            if (pass.length < 6)
+              return (document.getElementById("registerError").textContent =
+                "Mật khẩu ít nhất 6 ký tự!");
+            if (pass !== pass2)
+              return (document.getElementById("registerError").textContent =
+                "Mật khẩu nhập lại không khớp!");
+            if (users.some((u) => u.identifier === identifier))
+              return (document.getElementById("registerError").textContent =
+                regMethod === "email"
+                  ? "Email này đã được đăng ký!"
+                  : "Số điện thoại này đã được đăng ký!");
 
-          if (admins.length === 0) {
-            admins.push(email);
-            localStorage.setItem("forumAdmins", JSON.stringify(admins));
+            pendingUser = { displayName, identifier, password: pass };
+            generatedOTP = Math.floor(
+              100000 + Math.random() * 900000,
+            ).toString();
+
+            const submitBtn = document.getElementById("regSubmitBtn");
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Đang gửi mã OTP...";
+
+            if (regMethod === "email") {
+              const templateParams = {
+                to_email: identifier,
+                to_name: displayName,
+                otp_code: generatedOTP,
+              };
+
+              // Gửi qua EmailJS với template_o7hrpjs
+              emailjs
+                .send("service_098w5ui", "template_o7hrpjs", templateParams)
+                .then(
+                  function (response) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Xác Nhận & Hoàn Tất Đăng Ký";
+                    document.getElementById("otpInstructionText").textContent =
+                      `Mã OTP đã được gửi đến email: ${identifier}`;
+
+                    // Chuyển giao diện sang bước nhập OTP
+                    document.getElementById(
+                      "registerInputsGroup",
+                    ).style.display = "none";
+                    document.getElementById("otpSectionGroup").style.display =
+                      "block";
+                    document.getElementById("regBackBtn").style.display =
+                      "block";
+                    isWaitingForOTP = true;
+                  },
+                  function (error) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Gửi Mã OTP";
+                    document.getElementById("registerError").textContent =
+                      "Gửi email OTP thất bại. Vui lòng kiểm tra lại thông tin!";
+                  },
+                );
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Xác Nhận & Hoàn Tất Đăng Ký";
+              alert(
+                `[MÔ PHỎNG SMS] Mã OTP gửi tới số ${identifier} là: ${generatedOTP}`,
+              );
+              document.getElementById("otpInstructionText").textContent =
+                `Mã OTP đã được gửi đến số điện thoại: ${identifier}`;
+
+              document.getElementById("registerInputsGroup").style.display =
+                "none";
+              document.getElementById("otpSectionGroup").style.display =
+                "block";
+              document.getElementById("regBackBtn").style.display = "block";
+              isWaitingForOTP = true;
+            }
+          } else {
+            // --- BƯỚC 2: XÁC THỰC MÃ OTP DO NGƯỜI DÙNG NHẬP ---
+            const inputOTP = document
+              .getElementById("regOtpInput")
+              .value.trim();
+            if (inputOTP === generatedOTP) {
+              users.push(pendingUser);
+              localStorage.setItem("forumUsers", JSON.stringify(users));
+
+              currentUser = { ...pendingUser };
+              localStorage.setItem("savedIdentifier", pendingUser.identifier);
+              localStorage.setItem("savedPassword", pendingUser.password);
+
+              // Reset form đăng ký
+              resetRegForm();
+              showForum();
+            } else {
+              document.getElementById("registerError").textContent =
+                "Mã OTP không chính xác, vui lòng kiểm tra lại!";
+            }
           }
-
-          currentUser = { ...newUser };
-          localStorage.setItem("savedEmail", email);
-          localStorage.setItem("savedPassword", pass);
-          showForum();
         });
+
+      function resetRegForm() {
+        isWaitingForOTP = false;
+        pendingUser = null;
+        generatedOTP = null;
+        document.getElementById("registerInputsGroup").style.display = "block";
+        document.getElementById("otpSectionGroup").style.display = "none";
+        document.getElementById("regBackBtn").style.display = "none";
+        document.getElementById("regSubmitBtn").textContent = "Gửi Mã OTP";
+        document.getElementById("regOtpInput").value = "";
+        document.getElementById("registerError").textContent = "";
+      }
 
       document.getElementById("loginForm").addEventListener("submit", (e) => {
         e.preventDefault();
         clearErrors();
-        const email = document.getElementById("loginEmail").value.trim();
+        const identifier = document
+          .getElementById("loginIdentifier")
+          .value.trim();
         const pass = document.getElementById("loginPassword").value;
         const remember = document.getElementById("rememberMe").checked;
 
-        if (bannedUsers.includes(email))
+        if (bannedUsers.includes(identifier))
           return (document.getElementById("loginError").textContent =
             "Tài khoản của bạn đã bị cấm truy cập!");
 
         const found = users.find(
-          (u) => u.email === email && u.password === pass,
+          (u) => u.identifier === identifier && u.password === pass,
         );
         if (!found)
           return (document.getElementById("loginError").textContent =
-            "Email hoặc mật khẩu không đúng!");
+            "Tài khoản hoặc mật khẩu không đúng!");
 
         currentUser = { ...found };
         remember
-          ? (localStorage.setItem("savedEmail", email),
+          ? (localStorage.setItem("savedIdentifier", identifier),
             localStorage.setItem("savedPassword", pass))
-          : (localStorage.removeItem("savedEmail"),
+          : (localStorage.removeItem("savedIdentifier"),
             localStorage.removeItem("savedPassword"));
         showForum();
       });
 
-      function isAdmin(email) {
-        return admins.includes(email);
+      function isAdmin(identifier) {
+        return admins.includes(identifier);
       }
 
       function showForum() {
-        if (bannedUsers.includes(currentUser.email)) {
+        if (bannedUsers.includes(currentUser.identifier)) {
           alert("Tài khoản của bạn đã bị cấm!");
           logout();
           return;
@@ -703,7 +997,7 @@
         const roleBadge = document.getElementById("userRoleBadge");
         const adminPanel = document.getElementById("adminPanel");
 
-        if (isAdmin(currentUser.email)) {
+        if (isAdmin(currentUser.identifier)) {
           roleBadge.innerHTML = `<span class="badge-admin">Admin</span>`;
           adminPanel.style.display = "block";
         } else {
@@ -741,9 +1035,39 @@
         renderForumTabs();
       }
 
+      function deleteCategory(catId, event) {
+        event.stopPropagation();
+
+        if (categories.length <= 1) {
+          alert("Hệ thống phải giữ lại ít nhất một diễn đàn!");
+          return;
+        }
+
+        if (
+          confirm(
+            "Bạn có chắc chắn muốn xóa diễn đàn này? Toàn bộ bài viết bên trong cũng sẽ bị xóa vĩnh viễn.",
+          )
+        ) {
+          categories = categories.filter((c) => c.id !== catId);
+          localStorage.setItem("forumCategories", JSON.stringify(categories));
+
+          posts = posts.filter((p) => (p.categoryId || "general") !== catId);
+          localStorage.setItem("forumPosts", JSON.stringify(posts));
+
+          if (currentCategory === catId) {
+            currentCategory = categories[0].id;
+          }
+
+          renderForumTabs();
+          renderPosts();
+        }
+      }
+
       function renderForumTabs() {
         const bar = document.getElementById("forumTabsBar");
         bar.innerHTML = "";
+
+        const userIsAdmin = isAdmin(currentUser.identifier);
 
         categories.forEach((cat) => {
           const btn = document.createElement("button");
@@ -753,7 +1077,13 @@
           if (cat.mode === "readonly") icon = "🔒";
           if (cat.mode === "admin_only_post") icon = "📢";
 
-          btn.innerHTML = `${cat.name} ${icon}`;
+          let htmlContent = `${cat.name} ${icon}`;
+
+          if (userIsAdmin && categories.length > 1) {
+            htmlContent += ` <span class="forum-tab-delete" onclick="deleteCategory('${cat.id}', event)" title="Xóa diễn đàn">✕</span>`;
+          }
+
+          btn.innerHTML = htmlContent;
           btn.onclick = () => {
             currentCategory = cat.id;
             renderForumTabs();
@@ -766,7 +1096,6 @@
           categories.find((c) => c.id === currentCategory) || categories[0];
         const postFormBox = document.getElementById("postFormBox");
         const readonlyNotice = document.getElementById("readonlyNotice");
-        const userIsAdmin = isAdmin(currentUser.email);
 
         if (activeCat.mode === "readonly") {
           postFormBox.style.display = "none";
@@ -791,27 +1120,27 @@
 
       function promoteAdmin() {
         const emailInput = document.getElementById("newAdminEmail");
-        const email = emailInput.value.trim();
+        const identifier = emailInput.value.trim();
         const errEl = document.getElementById("adminError");
 
-        if (!email) {
-          errEl.textContent = "Vui lòng nhập email!";
+        if (!identifier) {
+          errEl.textContent = "Vui lòng nhập thông tin tài khoản!";
           return;
         }
-        if (!users.some((u) => u.email === email)) {
-          errEl.textContent = "Không tìm thấy tài khoản với email này!";
+        if (!users.some((u) => u.identifier === identifier)) {
+          errEl.textContent = "Không tìm thấy tài khoản với thông tin này!";
           return;
         }
-        if (admins.includes(email)) {
+        if (admins.includes(identifier)) {
           errEl.textContent = "Tài khoản này đã là Admin!";
           return;
         }
 
-        admins.push(email);
+        admins.push(identifier);
         localStorage.setItem("forumAdmins", JSON.stringify(admins));
         emailInput.value = "";
         errEl.style.color = "#16a34a";
-        errEl.textContent = "Đã cấp quyền Admin cho " + email;
+        errEl.textContent = "Đã cấp quyền Admin thành công!";
         setTimeout(() => {
           errEl.style.color = "#dc2626";
           errEl.textContent = "";
@@ -819,31 +1148,34 @@
         showForum();
       }
 
-      function banUser(email, name) {
-        if (email === currentUser.email) {
+      function banUser(identifier, name) {
+        if (identifier === currentUser.identifier) {
           alert("Bạn không thể tự cấm tài khoản của chính mình!");
           return;
         }
         if (
-          confirm(`Bạn có chắc chắn muốn cấm tài khoản "${name}" (${email})?`)
+          confirm(
+            `Bạn có chắc chắn muốn cấm tài khoản "${name}" (${identifier})?`,
+          )
         ) {
-          if (!bannedUsers.includes(email)) {
-            bannedUsers.push(email);
+          if (!bannedUsers.includes(identifier)) {
+            bannedUsers.push(identifier);
             localStorage.setItem("forumBanned", JSON.stringify(bannedUsers));
           }
-          alert(`Đã cấm tài khoản ${email}`);
+          alert(`Đã cấm tài khoản ${identifier}`);
           renderPosts();
         }
       }
 
       function logout() {
-        localStorage.removeItem("savedEmail");
+        localStorage.removeItem("savedIdentifier");
         localStorage.removeItem("savedPassword");
         currentUser = null;
         postImageData = null;
         postVideoData = null;
         postFileDataObj = null;
         commentMediaMap = {};
+        resetRegForm();
         document.getElementById("authArea").style.display = "block";
         document.getElementById("forumArea").style.display = "none";
         document.getElementById("loginForm").reset();
@@ -954,7 +1286,7 @@
           title,
           content,
           author: currentUser.displayName,
-          authorEmail: currentUser.email,
+          authorIdentifier: currentUser.identifier,
           receiver,
           image: postImageData,
           video: postVideoData,
@@ -1002,7 +1334,7 @@
 
         posts[globalIdx].comments.push({
           author: currentUser.displayName,
-          authorEmail: currentUser.email,
+          authorIdentifier: currentUser.identifier,
           text,
           file: media || null,
           time: new Date().toLocaleString("vi-VN"),
@@ -1037,8 +1369,9 @@
         }
 
         filteredPosts.forEach(({ post, originalIndex: idx }) => {
-          const isUserAdmin = isAdmin(currentUser.email);
-          const isOwner = currentUser && post.authorEmail === currentUser.email;
+          const isUserAdmin = isAdmin(currentUser.identifier);
+          const isOwner =
+            currentUser && post.authorIdentifier === currentUser.identifier;
           const canDeletePost = isOwner || isUserAdmin;
 
           let postMediaHtml = "";
@@ -1069,7 +1402,7 @@
           if (post.comments && post.comments.length > 0) {
             post.comments.forEach((cmt, cmtIdx) => {
               const isCmtOwner =
-                currentUser && cmt.authorEmail === currentUser.email;
+                currentUser && cmt.authorIdentifier === currentUser.identifier;
               const canDeleteCmt = isCmtOwner || isUserAdmin;
 
               let cmtFileHtml = "";
@@ -1102,11 +1435,10 @@
           }
 
           let banBtnHtml = "";
-          if (isUserAdmin && post.authorEmail !== currentUser.email) {
-            banBtnHtml = `<button class="btn-small btn-ban" onclick="banUser('${escapeHtml(post.authorEmail)}', '${escapeHtml(post.author)}')">⛔ Cấm</button>`;
+          if (isUserAdmin && post.authorIdentifier !== currentUser.identifier) {
+            banBtnHtml = `<button class="btn-small btn-ban" onclick="banUser('${escapeHtml(post.authorIdentifier)}', '${escapeHtml(post.author)}')">⛔ Cấm</button>`;
           }
 
-          // Mọi người đều có quyền bình luận và gửi file ở phần bình luận
           const commentSectionHtml = `
             <div class="comment-section">
               <h4>💬 Bình luận</h4>
@@ -1130,7 +1462,7 @@
             </div>
           </div>
           <p class="meta">
-            👤 Từ: <strong>${escapeHtml(post.author)}</strong> &lt;${escapeHtml(post.authorEmail)}&gt;<br>
+            👤 Từ: <strong>${escapeHtml(post.author)}</strong> &lt;${escapeHtml(post.authorIdentifier)}&gt;<br>
             📩 Đến: <span class="to">${escapeHtml(post.receiver)}</span><br>
             🕒 Thời gian: ${post.time}
           </p>
@@ -1145,4 +1477,3 @@
     </script>
   </body>
 </html>
-
